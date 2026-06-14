@@ -2,7 +2,7 @@
 
 A modern, high-performance e-commerce storefront adapted from the classic **SportsStore** application in *"Pro ASP.NET Core MVC 2" by Adam Freeman*, built using **Blazor Web App** architecture on **.NET 10** with Entity Framework Core and SQLite.
 
-This project is enhanced with advanced academic theories, design patterns, and engineering constraints derived from 12 MSIS graduate courses.
+This project features Clean Architecture separation of concerns, In-Memory caching, real-time reactive SignalR bindings, and complete ASP.NET Core Identity authentication.
 
 ---
 
@@ -50,22 +50,7 @@ dotnet test
 *   **Caching:** In-Memory Caching (`IMemoryCache`) implemented via the **Decorator Pattern** to optimize page loading throughput.
 *   **Security:** Role-Based Access Control (RBAC) via **ASP.NET Core Identity** to secure administrative endpoints.
 
----
 
-## 🎓 Academic Concepts & Interview Prep Guides
-
-This application integrates core theories and design frameworks from our MSIS graduate program. Detailed, topic-specific explanations are located in the [InterviewPrep](file:///Users/gerrell/Documents/Sports%20Store/InterviewPrep) directory:
-
-1.  **[Software Architecture (CIS 518/510/512)](file:///Users/gerrell/Documents/Sports%20Store/InterviewPrep/design_architecture.md):** Clean Architecture layers, SOLID principles, Dependency Inversion, and Decorator/Observer design patterns.
-2.  **[Database Strategic Planning & ACID (CIS 515)](file:///Users/gerrell/Documents/Sports%20Store/InterviewPrep/database_strategy.md):** 3rd Normal Form schema, index optimization, and database transaction scopes guaranteeing ACID properties.
-3.  **[Performance Engineering (CIS 555)](file:///Users/gerrell/Documents/Sports%20Store/InterviewPrep/performance_requirements.md):** Resolution of the ORM N+1 query problem, read-caching, and queue capacity planning ($M/M/1$ queues).
-4.  **[Security Management & RBAC (CIS 502)](file:///Users/gerrell/Documents/Sports%20Store/InterviewPrep/security_management.md):** Identity AAA integration, RBAC boundaries, the CIA Triad, and PCI-DSS payment compliance.
-5.  **[Network Protocols & Communication (CIS 505)](file:///Users/gerrell/Documents/Sports%20Store/InterviewPrep/network_communication.md):** Stateful WebSockets/SignalR connection circuits and UDP-multiplexed HTTP/3 QUIC protocol.
-6.  **[Usability & HCI (CIS 524)](file:///Users/gerrell/Documents/Sports%20Store/InterviewPrep/usability_hci.md):** Shneiderman's Eight Golden Rules of interface design and WCAG POUR accessibility.
-7.  **[Project Governance (BUS 517/CIS 554/599)](file:///Users/gerrell/Documents/Sports%20Store/InterviewPrep/project_governance.md):** WBS scope controls, RACI matrices, Earned Value Management, and Requirements Traceability.
-8.  **[Layered System Architecture Diagram](file:///Users/gerrell/Documents/Sports%20Store/InterviewPrep/system_architecture.md):** Technical Mermaid diagram mapping request flows across all boundaries.
-
----
 
 ## 📂 Directory Structure
 
@@ -81,7 +66,7 @@ This application integrates core theories and design frameworks from our MSIS gr
 │   │   ├── Models/               # Normalized Domain Models (Product, Category, Order)
 │   │   └── Services/             # Cart State Service
 │   └── SportsStore.Tests/        # Test Suite (xUnit Domain and bUnit Component tests)
-├── InterviewPrep/                # MSIS Graduate Course Alignment Guides
-├── design.md                     # Initial Project Migration Design Document
-└── README.md                     # Project Overview & Entry point (this file)
+├── InterviewPrep/                # Architecture and System Design Guides
+├── design.md                     # Project Migration Design Document
+└── README.md                     # Project Overview (this file)
 ```
