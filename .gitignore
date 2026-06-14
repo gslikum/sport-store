@@ -1,0 +1,55 @@
+# Ignore PDF Ebooks
+*.pdf
+
+# Ignore Strayer University Course Notes
+BUS_*.md
+CIS_*.md
+
+# Ignore Interview Prep Documents
+design.md
+InterviewPrep/
+
+# Standard .NET GitIgnore Patterns
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# SQLite databases (local dev data)
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.useroverride
+*.userprefs
+*.csproj.user
+*.sqlproj.user
+*.sln.docstates
+
+# IDE-specific directories
+.vs/
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln.docstates
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

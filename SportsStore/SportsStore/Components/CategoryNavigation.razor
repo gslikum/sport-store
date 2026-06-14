@@ -1,0 +1,22 @@
+@inject IStoreRepository Repository
+
+<h4 class="text-white mb-3">Categories</h4>
+<div class="d-grid gap-2">
+    <a href="/" class="btn nav-pill-custom @(string.IsNullOrEmpty(SelectedCategory) ? "active" : "")">
+        Home / All
+    </a>
+    @foreach (var cat in Categories)
+    {
+        <a href="/products/category/@cat.Name" 
+           class="btn nav-pill-custom @(SelectedCategory == cat.Name ? "active" : "")">
+            @cat.Name
+        </a>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? SelectedCategory { get; set; }
+
+    private IEnumerable<Category> Categories => Repository.Categories.ToList();
+}

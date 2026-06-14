@@ -1,0 +1,310 @@
+@page "/admin"
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = "Admins")]
+@using Microsoft.AspNetCore.Authorization
+
+@inject IStoreRepository Repository
+@inject NavigationManager NavigationManager
+
+<PageTitle>Admin Dashboard</PageTitle>
+
+<div class="row">
+    <!-- Sidebar Navigation -->
+    <div class="col-md-3 mb-4">
+        <div class="card-custom p-4">
+            <h3 class="text-white mb-4">Admin Panel</h3>
+            <div class="d-grid gap-2">
+                <button class="btn nav-pill-custom @(activeTab == "Products" ? "active" : "")" 
+                        @onclick='() => SetTab("Products")'>
+                    Manage Products
+                </button>
+                <button class="btn nav-pill-custom @(activeTab == "Orders" ? "active" : "")" 
+                        @onclick='() => SetTab("Orders")'>
+                    Manage Orders
+                </button>
+            </div>
+            <hr class="border-secondary my-4" />
+            <a href="/" class="btn btn-outline-secondary w-100 text-white" style="border-color: var(--border-color);">
+                Back to Storefront
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="col-md-9">
+        @if (errorMessage != null)
+        {
+            <div class="alert alert-danger mb-4">@errorMessage</div>
+        }
+
+        @if (editingProduct != null)
+        {
+            <!-- Product Editor Panel -->
+            <div class="card-custom p-5">
+                <h3 class="text-white mb-4">@(editingProduct.ProductId == 0 ? "Add Product" : $"Edit Product: {editingProduct.Name}")</h3>
+                
+                <EditForm Model="editingProduct" OnValidSubmit="SaveProduct">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger mb-4" />
+
+                    <div class="mb-3">
+                        <label class="form-label text-white">Product Name</label>
+                        <InputText class="form-control bg-dark border-secondary text-white" @bind-Value="editingProduct.Name" />
+                        <ValidationMessage For="@(() => editingProduct.Name)" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-white">Description</label>
+                        <InputTextArea class="form-control bg-dark border-secondary text-white" rows="3" @bind-Value="editingProduct.Description" />
+                        <ValidationMessage For="@(() => editingProduct.Description)" class="text-danger" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-white">Category</label>
+                            <InputSelect @bind-Value="editingProduct.CategoryId" class="form-select bg-dark border-secondary text-white">
+                                <option value="0">Select Category</option>
+                                @foreach (var cat in Categories)
+                                {
+                                    <option value="@cat.CategoryId">@cat.Name</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => editingProduct.CategoryId)" class="text-danger" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-white">Price ($)</label>
+                            <InputNumber class="form-control bg-dark border-secondary text-white" @bind-Value="editingProduct.Price" />
+                            <ValidationMessage For="@(() => editingProduct.Price)" class="text-danger" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label text-white">Stock Quantity</label>
+                            <InputNumber class="form-control bg-dark border-secondary text-white" @bind-Value="editingProduct.StockQuantity" />
+                            <ValidationMessage For="@(() => editingProduct.StockQuantity)" class="text-danger" />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-3 mt-4">
+                        <button type="button" class="btn btn-secondary px-4" @onclick="CancelEditing">Cancel</button>
+                        <button type="submit" class="btn btn-accent-custom px-4">Save Product</button>
+                    </div>
+                </EditForm>
+            </div>
+        }
+        else if (activeTab == "Products")
+        {
+            <!-- Products Table -->
+            <div class="card-custom p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 class="text-white mb-0">Products Inventory</h3>
+                    <button class="btn btn-accent-custom d-flex align-items-center" @onclick="CreateNewProduct">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg me-1" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+                        </svg>
+                        Add Product
+                    </button>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-center">Stock</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var prod in Products)
+                            {
+                                <tr>
+                                    <td>@prod.ProductId</td>
+                                    <td class="fw-semibold text-white">@prod.Name</td>
+                                    <td>@prod.Category?.Name</td>
+                                    <td class="text-end text-muted">$@prod.Price.ToString("F2")</td>
+                                    <td class="text-center @(prod.StockQuantity <= 3 ? "text-danger fw-bold" : "")">
+                                        @prod.StockQuantity
+                                    </td>
+                                    <td class="text-center">
+                                        <button class="btn btn-outline-info btn-sm me-2" @onclick="() => EditProduct(prod)">Edit</button>
+                                        <button class="btn btn-danger btn-sm" @onclick="() => DeleteProduct(prod)">Delete</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else if (activeTab == "Orders")
+        {
+            <!-- Orders List -->
+            <div class="card-custom p-4">
+                <h3 class="text-white mb-4">Manage Customer Orders</h3>
+                
+                @if (!Orders.Any())
+                {
+                    <p class="text-muted fs-5 py-4 text-center">No customer orders recorded yet.</p>
+                }
+                else
+                {
+                    @foreach (var ord in Orders)
+                    {
+                        <div class="card bg-dark border-secondary mb-4 p-4 rounded-3">
+                            <div class="d-flex justify-content-between align-items-start border-bottom border-secondary pb-3 mb-3">
+                                <div>
+                                    <h5 class="text-white mb-1">Order #@ord.OrderId - @ord.Name</h5>
+                                    <p class="text-muted mb-0">@ord.Line1, @ord.City, @ord.State, @ord.Country</p>
+                                </div>
+                                <div>
+                                    @if (ord.Shipped)
+                                    {
+                                        <span class="badge bg-success px-3 py-2">Shipped</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark px-3 py-2 me-2">Pending</span>
+                                        <button class="btn btn-accent-custom btn-sm" @onclick="() => ShipOrder(ord)">
+                                            Mark as Shipped
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <h6 class="text-white mb-2">Ordered Items:</h6>
+                            <table class="table table-dark table-sm table-borderless mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-center">Quantity</th>
+                                        <th class="text-end">Price</th>
+                                        <th class="text-end">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var line in ord.Lines)
+                                    {
+                                        <tr>
+                                            <td>@line.Product.Name</td>
+                                            <td class="text-center">@line.Quantity</td>
+                                            <td class="text-end text-muted">$@line.Product.Price.ToString("F2")</td>
+                                            <td class="text-end text-white">$@((line.Quantity * line.Product.Price).ToString("F2"))</td>
+                                        </tr>
+                                    }
+                                    <tr class="border-top border-secondary">
+                                        <td colspan="3" class="text-end fw-bold text-muted">Order Total:</td>
+                                        <td class="text-end fw-bold text-accent" style="color: var(--accent);">
+                                            $@ord.Lines.Sum(l => l.Quantity * l.Product.Price).ToString("F2")
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string activeTab = "Products";
+    private Product? editingProduct;
+    private string? errorMessage;
+
+    private void SetTab(string tab)
+    {
+        activeTab = tab;
+        editingProduct = null;
+        errorMessage = null;
+    }
+
+    private IEnumerable<Category> Categories => Repository.Categories.ToList();
+    
+    private IEnumerable<Product> Products => Repository.Products.ToList();
+
+    private IEnumerable<Order> Orders => Repository.Orders.OrderBy(o => o.Shipped).ToList();
+
+    private void CreateNewProduct()
+    {
+        editingProduct = new Product { CategoryId = Categories.FirstOrDefault()?.CategoryId ?? 0 };
+    }
+
+    private void EditProduct(Product product)
+    {
+        // Bind editingProduct clone to protect current list states
+        editingProduct = new Product
+        {
+            ProductId = product.ProductId,
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price,
+            CategoryId = product.CategoryId,
+            StockQuantity = product.StockQuantity
+        };
+    }
+
+    private void SaveProduct()
+    {
+        if (editingProduct == null) return;
+        
+        if (editingProduct.CategoryId == 0)
+        {
+            errorMessage = "Please select a valid product category.";
+            return;
+        }
+
+        try
+        {
+            if (editingProduct.ProductId == 0)
+            {
+                Repository.CreateProduct(editingProduct);
+            }
+            else
+            {
+                Repository.SaveProduct(editingProduct);
+            }
+            editingProduct = null;
+            errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Saving failed: {ex.Message}";
+        }
+    }
+
+    private void DeleteProduct(Product product)
+    {
+        try
+        {
+            Repository.DeleteProduct(product);
+            errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Deleting failed: {ex.Message}";
+        }
+    }
+
+    private void CancelEditing()
+    {
+        editingProduct = null;
+        errorMessage = null;
+    }
+
+    private void ShipOrder(Order order)
+    {
+        try
+        {
+            order.Shipped = true;
+            Repository.SaveOrder(order);
+            errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Failed to ship order: {ex.Message}";
+        }
+    }
+}

@@ -1,0 +1,138 @@
+@page "/checkout"
+@rendermode InteractiveServer
+
+@using SportsStore.Services
+@using SportsStore.Client.Services
+@inject CartStateService CartState
+@inject IStoreRepository Repository
+@inject NavigationManager NavigationManager
+
+<PageTitle>Checkout</PageTitle>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card-custom p-5">
+            <h2 class="text-white mb-4">Check out now</h2>
+            <p class="text-muted mb-4">Please enter your details, and we'll ship your goods right away!</p>
+
+            @if (errorMessage != null)
+            {
+                <div class="alert alert-danger mb-4">@errorMessage</div>
+            }
+
+            <EditForm Model="order" OnValidSubmit="PlaceOrder">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger mb-4" />
+
+                <h5 class="text-white border-bottom border-secondary pb-2 mb-3">Ship to</h5>
+                
+                <div class="mb-3">
+                    <label class="form-label text-white">Name</label>
+                    <InputText class="form-control bg-dark border-secondary text-white" @bind-Value="order.Name" />
+                    <ValidationMessage For="@(() => order.Name)" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Address Line 1</label>
+                    <InputText class="form-control bg-dark border-secondary text-white" @bind-Value="order.Line1" />
+                    <ValidationMessage For="@(() => order.Line1)" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Address Line 2</label>
+                    <InputText class="form-control bg-dark border-secondary text-white" @bind-Value="order.Line2" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white">Address Line 3</label>
+                    <InputText class="form-control bg-dark border-secondary text-white" @bind-Value="order.Line3" />
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-white">City</label>
+                        <InputText class="form-control bg-dark border-secondary text-white" @bind-Value="order.City" />
+                        <ValidationMessage For="@(() => order.City)" class="text-danger" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-white">State</label>
+                        <InputText class="form-control bg-dark border-secondary text-white" @bind-Value="order.State" />
+                        <ValidationMessage For="@(() => order.State)" class="text-danger" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-white">Zip</label>
+                        <InputText class="form-control bg-dark border-secondary text-white" @bind-Value="order.Zip" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-white">Country</label>
+                        <InputText class="form-control bg-dark border-secondary text-white" @bind-Value="order.Country" />
+                        <ValidationMessage For="@(() => order.Country)" class="text-danger" />
+                    </div>
+                </div>
+
+                <h5 class="text-white border-bottom border-secondary pb-2 mb-3 mt-4">Options</h5>
+                <div class="form-check mb-4">
+                    <InputCheckbox class="form-check-input darker-border-checkbox" id="giftwrap" @bind-Value="order.GiftWrap" />
+                    <label class="form-check-label text-white" for="giftwrap">
+                        Gift wrap these items?
+                    </label>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button class="btn btn-accent-custom px-5 py-2 fw-semibold fs-5 w-100" type="submit">
+                        Complete Order
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Order order = new();
+    private string? errorMessage;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && CartState is SessionCartStateService sessionCart)
+        {
+            await sessionCart.LoadCartAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task PlaceOrder()
+    {
+        if (!CartState.Cart.Lines.Any())
+        {
+            errorMessage = "Your cart is empty! Add products before checking out.";
+            return;
+        }
+
+        try
+        {
+            // Bind cart lines to order
+            order.Lines = CartState.Cart.Lines.ToList();
+            
+            // Save order using transactional stock checks (ACID)
+            Repository.SaveOrder(order);
+            
+            // Clear cart state
+            CartState.Clear();
+            if (CartState is SessionCartStateService sessionCart)
+            {
+                await sessionCart.SaveCartAsync();
+            }
+
+            // Redirect to order completed page
+            NavigationManager.NavigateTo($"/order-completed/{order.OrderId}");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Checkout failed: {ex.Message}";
+        }
+    }
+}

@@ -1,0 +1,104 @@
+@page "/"
+@page "/products/page-{page:int}"
+@page "/products/category/{category}"
+@page "/products/category/{category}/page-{page:int}"
+@rendermode InteractiveServer
+
+@inject IStoreRepository Repository
+@inject NavigationManager NavigationManager
+@inject CartStateService CartState
+
+<PageTitle>SportsStore Catalog</PageTitle>
+
+<div class="row">
+    <!-- Category Navigation Sidebar (DRY component) -->
+    <div class="col-md-3 mb-4">
+        <CategoryNavigation SelectedCategory="@Category" />
+    </div>
+
+    <!-- Product Catalog List -->
+    <div class="col-md-9">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            @if (!Products.Any())
+            {
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted fs-4">No products found in this category.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var prod in Products)
+                {
+                    <div class="col">
+                        <div class="card h-100 card-custom">
+                            <div class="card-custom-body d-flex flex-column h-100">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title text-white mb-0">@prod.Name</h5>
+                                    <span class="badge badge-custom px-2 py-1">@prod.Category?.Name</span>
+                                </div>
+                                <p class="card-text text-muted flex-grow-1">@prod.Description</p>
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="fs-4 fw-bold text-white">$@prod.Price.ToString("F2")</span>
+                                    <button class="btn btn-primary-custom px-3 py-2 d-flex align-items-center"
+                                            @onclick="() => AddToCart(prod)">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart-plus me-1" viewBox="0 0 16 16">
+                                            <path d="M9 5.5a.5.5 0 0 0-1 0V7H6.5a.5.5 0 0 0 0 1H8v1.5a.5.5 0 0 0 1 0V8h1.5a.5.5 0 0 0 0-1H9V5.5z"/>
+                                            <path d="M.5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                        </svg>
+                                        Add To Cart
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <!-- Custom Pagination Component (reusable bUnit testable component) -->
+        @if (TotalPages > 1)
+        {
+            <Pager CurrentPage="@CurrentPage" TotalPages="@TotalPages" PageUrl="@GetPageUrl" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int? Page { get; set; }
+
+    [Parameter]
+    public string? Category { get; set; }
+
+    private int CurrentPage => Page ?? 1;
+    private int PageSize = 4; // Display 4 products per page
+
+    private IEnumerable<Product> Products => Repository.Products
+        .Where(p => Category == null || (p.Category != null && p.Category.Name == Category))
+        .Skip((CurrentPage - 1) * PageSize)
+        .Take(PageSize)
+        .ToList();
+
+    private int TotalItems => Repository.Products
+        .Count(p => Category == null || (p.Category != null && p.Category.Name == Category));
+
+    private int TotalPages => (int)Math.Ceiling((decimal)TotalItems / PageSize);
+
+    private string GetPageUrl(int pageNum)
+    {
+        if (string.IsNullOrEmpty(Category))
+        {
+            return $"/products/page-{pageNum}";
+        }
+        return $"/products/category/{Category}/page-{pageNum}";
+    }
+
+    private async Task AddToCart(Product product)
+    {
+        CartState.AddItem(product, 1);
+        if (CartState is SessionCartStateService sessionCart)
+        {
+            await sessionCart.SaveCartAsync();
+        }
+    }
+}

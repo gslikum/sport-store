@@ -1,0 +1,169 @@
+/* SportsStore Custom Design System & Aesthetics */
+:root {
+    --bg-dark: #0f172a;       /* Slate 900 */
+    --bg-card: #1e293b;       /* Slate 800 */
+    --primary: #6366f1;       /* Indigo 500 */
+    --primary-hover: #4f46e5; /* Indigo 600 */
+    --accent: #14b8a6;        /* Teal 500 */
+    --accent-hover: #0d9488;  /* Teal 600 */
+    --text-main: #f8fafc;     /* Slate 50 */
+    --text-muted: #94a3b8;    /* Slate 400 */
+    --border-color: #334155;  /* Slate 700 */
+    --glow: rgba(99, 102, 241, 0.15);
+}
+
+html, body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+a, .btn-link {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+a:hover, .btn-link:hover {
+    color: var(--accent-hover);
+}
+
+/* Modern Card Styling with Glassmorphism / Glow Effects */
+.card-custom {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.card-custom:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), 0 0 15px var(--glow);
+    border-color: var(--primary);
+}
+
+.card-custom-body {
+    padding: 1.5rem;
+}
+
+/* Custom Navigation Buttons */
+.nav-pill-custom {
+    background-color: var(--bg-card);
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    width: 100%;
+    text-align: left;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.nav-pill-custom:hover, .nav-pill-custom.active {
+    background-color: var(--primary);
+    color: var(--text-main);
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px var(--glow);
+    transform: translateX(4px);
+}
+
+/* Premium Buttons */
+.btn-primary-custom {
+    background-color: var(--primary);
+    border: 1px solid var(--primary);
+    color: var(--text-main);
+    border-radius: 0.75rem;
+    padding: 0.6rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary-custom:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    box-shadow: 0 4px 14px var(--glow);
+    transform: translateY(-1px);
+}
+
+.btn-accent-custom {
+    background-color: var(--accent);
+    border: 1px solid var(--accent);
+    color: var(--text-main);
+    border-radius: 0.75rem;
+    padding: 0.6rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-accent-custom:hover {
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
+    box-shadow: 0 4px 14px rgba(20, 184, 166, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Custom Header with Glassmorphism */
+.header-glass {
+    background: rgba(30, 41, 59, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+/* Badge Styling */
+.badge-custom {
+    background-color: var(--primary);
+    color: var(--text-main);
+    border-radius: 0.5rem;
+    font-weight: 600;
+}
+
+/* Blazor validation styles */
+.valid.modified:not([type=checkbox]) {
+    border-color: var(--accent);
+}
+
+.invalid {
+    border-color: #ef4444 !important; /* Red 500 */
+}
+
+.validation-message {
+    color: #ef4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.blazor-error-boundary {
+    background: #ef4444;
+    padding: 1rem;
+    color: white;
+    border-radius: 0.5rem;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}

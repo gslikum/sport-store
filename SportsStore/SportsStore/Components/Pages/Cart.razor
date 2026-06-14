@@ -1,0 +1,129 @@
+@page "/cart"
+@rendermode InteractiveServer
+
+@using SportsStore.Services
+@using SportsStore.Client.Services
+@inject CartStateService CartState
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
+<PageTitle>Your Cart</PageTitle>
+
+<h2 class="text-white mb-4">Your Shopping Cart</h2>
+
+@if (!CartState.Cart.Lines.Any())
+{
+    <div class="text-center py-5 card-custom p-5">
+        <p class="text-muted fs-4 mb-4">Your cart is empty.</p>
+        <a href="/" class="btn btn-primary-custom px-4 py-2">Go to Catalog</a>
+    </div>
+}
+else
+{
+    <div class="table-responsive card-custom p-4">
+        <table class="table table-dark table-striped align-middle mb-0">
+            <thead>
+                <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col" class="text-center">Quantity</th>
+                    <th scope="col" class="text-end">Price</th>
+                    <th scope="col" class="text-end">Subtotal</th>
+                    <th scope="col" class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var line in CartState.Cart.Lines)
+                {
+                    <tr>
+                        <td class="fw-semibold text-white">@line.Product.Name</td>
+                        <td class="text-center">
+                            <div class="input-group input-group-sm justify-content-center" style="max-width: 120px; margin: 0 auto;">
+                                <button class="btn btn-outline-secondary" type="button" 
+                                        @onclick="() => UpdateQuantity(line.Product, -1)">-</button>
+                                <span class="input-group-text bg-dark border-secondary text-white px-3">@line.Quantity</span>
+                                <button class="btn btn-outline-secondary" type="button" 
+                                        @onclick="() => UpdateQuantity(line.Product, 1)">+</button>
+                            </div>
+                        </td>
+                        <td class="text-end text-muted">$@line.Product.Price.ToString("F2")</td>
+                        <td class="text-end text-white fw-bold">$@((line.Quantity * line.Product.Price).ToString("F2"))</td>
+                        <td class="text-center">
+                            <button class="btn btn-danger btn-sm" @onclick="() => RemoveLine(line.Product)">
+                                Remove
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-end fw-bold text-muted fs-5">Total:</td>
+                    <td class="text-end fw-bold fs-5" style="color: var(--accent);">$@CartState.Cart.ComputeTotalValue().ToString("F2")</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <a href="/" class="btn btn-outline-secondary btn-primary-custom" style="background-color: transparent; border-color: var(--border-color); color: var(--text-main);">
+            Continue Shopping
+        </a>
+        <a href="/checkout" class="btn btn-accent-custom px-4 py-2">
+            Proceed to Checkout
+        </a>
+    </div>
+}
+
+@code {
+    protected override void OnInitialized()
+    {
+        CartState.OnChange += StateHasChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && CartState is SessionCartStateService sessionCart)
+        {
+            await sessionCart.LoadCartAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateQuantity(Product product, int amount)
+    {
+        var line = CartState.Cart.Lines.FirstOrDefault(l => l.ProductId == product.ProductId);
+        if (line != null)
+        {
+            int newQuantity = line.Quantity + amount;
+            if (newQuantity <= 0)
+            {
+                CartState.RemoveLine(product);
+            }
+            else
+            {
+                CartState.UpdateQuantity(product, newQuantity);
+            }
+            await SaveCart();
+        }
+    }
+
+    private async Task RemoveLine(Product product)
+    {
+        CartState.RemoveLine(product);
+        await SaveCart();
+    }
+
+    private async Task SaveCart()
+    {
+        if (CartState is SessionCartStateService sessionCart)
+        {
+            await sessionCart.SaveCartAsync();
+        }
+    }
+
+    public void Dispose()
+    {
+        CartState.OnChange -= StateHasChanged;
+    }
+}
