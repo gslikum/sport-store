@@ -121,6 +121,43 @@ namespace SportsStore.Tests
             var cutSoccer = Render<Home>(parameters => parameters.Add(p => p.Category, "Soccer"));
             Assert.Contains("Soccer Ball", cutSoccer.Markup);
         }
+
+        [Fact]
+        public void Home_Add_To_Cart_Click_Updates_CartState()
+        {
+            // Arrange
+            var mockRepo = new Mock<IStoreRepository>();
+            var product = new Product 
+            { 
+                ProductId = 1, 
+                Name = "P1", 
+                Price = 100, 
+                Category = new Category { Name = "Watersports" },
+                StockQuantity = 5 
+            };
+            var products = new List<Product> { product }.AsQueryable();
+            mockRepo.Setup(r => r.Products).Returns(products);
+            mockRepo.Setup(r => r.Categories).Returns(new List<Category>
+            {
+                new Category { CategoryId = 1, Name = "Watersports" }
+            }.AsQueryable());
+
+            var cartState = new CartStateService();
+            Services.AddSingleton<IStoreRepository>(mockRepo.Object);
+            Services.AddSingleton<CartStateService>(cartState);
+
+            // Act
+            var cut = Render<Home>();
+            
+            // Find the "Add To Cart" button
+            var button = cut.Find("button.btn-primary-custom");
+            button.Click();
+
+            // Assert
+            Assert.Single(cartState.Cart.Lines);
+            Assert.Equal(1, cartState.Cart.Lines.First().Product.ProductId);
+            Assert.Equal(1, cartState.Cart.Lines.First().Quantity);
+        }
     }
 }
 
