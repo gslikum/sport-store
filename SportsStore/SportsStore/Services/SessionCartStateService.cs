@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using SportsStore.Client.Models;
@@ -10,14 +10,17 @@ using SportsStore.Client.Services;
 namespace SportsStore.Services
 {
     // Inherits CartStateService to add session persistence (CIS 502/555)
+    // Refactored to only serialize ProductId/Quantity (DTO) to prevent circular reference cycles
     public class SessionCartStateService : CartStateService
     {
         private readonly ProtectedSessionStorage _sessionStorage;
+        private readonly IStoreRepository _repository;
         private const string CartSessionKey = "CartSession";
 
-        public SessionCartStateService(ProtectedSessionStorage sessionStorage)
+        public SessionCartStateService(ProtectedSessionStorage sessionStorage, IStoreRepository repository)
         {
             _sessionStorage = sessionStorage;
+            _repository = repository;
         }
 
         private Task? _loadTask;
@@ -38,13 +41,17 @@ namespace SportsStore.Services
                 var result = await _sessionStorage.GetAsync<string>(CartSessionKey);
                 if (result.Success && !string.IsNullOrEmpty(result.Value))
                 {
-                    var lines = JsonSerializer.Deserialize<List<CartLine>>(result.Value);
+                    var items = JsonSerializer.Deserialize<List<SessionCartLine>>(result.Value);
                     Cart.Clear();
-                    if (lines != null)
+                    if (items != null)
                     {
-                        foreach (var line in lines)
+                        foreach (var item in items)
                         {
-                            Cart.AddItem(line.Product, line.Quantity);
+                            var product = _repository.Products.FirstOrDefault(p => p.ProductId == item.ProductId);
+                            if (product != null)
+                            {
+                                Cart.AddItem(product, item.Quantity);
+                            }
                         }
                     }
                     NotifyStateChanged();
@@ -61,10 +68,13 @@ namespace SportsStore.Services
         {
             try
             {
-                var json = JsonSerializer.Serialize(Cart.Lines, new JsonSerializerOptions
+                var items = Cart.Lines.Select(line => new SessionCartLine
                 {
-                    ReferenceHandler = ReferenceHandler.IgnoreCycles // Avoid loop circular references
-                });
+                    ProductId = line.ProductId,
+                    Quantity = line.Quantity
+                }).ToList();
+
+                var json = JsonSerializer.Serialize(items);
                 await _sessionStorage.SetAsync(CartSessionKey, json);
             }
             catch (Exception)
@@ -72,5 +82,11 @@ namespace SportsStore.Services
                 // JS interop disabled, safe to ignore
             }
         }
+    }
+
+    public class SessionCartLine
+    {
+        public long ProductId { get; set; }
+        public int Quantity { get; set; }
     }
 }
