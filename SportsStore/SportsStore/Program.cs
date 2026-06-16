@@ -85,9 +85,11 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-// Seed identity data on startup (Role and Admin accounts)
+// Migrate and seed database on startup
 using (var scope = app.Services.CreateScope())
 {
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await context.Database.MigrateAsync();
     await IdentitySeedData.SeedAsync(scope.ServiceProvider);
 }
 
