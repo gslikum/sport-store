@@ -8,21 +8,47 @@
 @inject NavigationManager NavigationManager
 @inject CartStateService CartState
 
-<PageTitle>SportsStore Catalog</PageTitle>
+<PageTitle>VolticsStore Catalog</PageTitle>
 
-<div class="row">
-    <!-- Category Navigation Sidebar (DRY component) -->
+<!-- Dynamic Sports Hero Banner -->
+<div class="hero-banner-custom p-5 mb-5 rounded-4 position-relative overflow-hidden d-flex align-items-center">
+    <div class="hero-overlay-custom"></div>
+    <div class="position-relative z-2 text-start" style="max-width: 650px;">
+        <span class="badge bg-danger text-white px-3 py-2 fs-6 mb-3 fw-semibold tracking-wider">20% SUMMER ENERGY SALE</span>
+        <h1 class="display-4 fw-extrabold text-white mb-3 text-uppercase" style="letter-spacing: -1px; line-height: 1.1; font-weight: 800;">
+            Gear Up.<br/>Define <span style="color: var(--primary);">Performance.</span>
+        </h1>
+        <p class="fs-5 text-muted mb-4">Discover next-generation athletic equipment designed to break records and elevate your training.</p>
+        <a href="#catalog" class="btn btn-accent-custom px-4 py-3 fw-bold text-uppercase fs-6">Explore Gear</a>
+    </div>
+</div>
+
+<div class="row" id="catalog">
+    <!-- Category Navigation Sidebar -->
     <div class="col-md-3 mb-4">
         <CategoryNavigation SelectedCategory="@Category" />
     </div>
 
     <!-- Product Catalog List -->
     <div class="col-md-9">
+        <!-- Live Search Bar -->
+        <div class="mb-4">
+            <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-muted">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                    </svg>
+                </span>
+                <input type="text" class="form-control bg-dark border-secondary text-white py-2" 
+                       placeholder="Search products..." @bind-value="searchQuery" @bind-value:event="oninput" />
+            </div>
+        </div>
+
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             @if (!Products.Any())
             {
                 <div class="col-12 text-center py-5">
-                    <p class="text-muted fs-4">No products found in this category.</p>
+                    <p class="text-muted fs-4">No products found matching your request.</p>
                 </div>
             }
             else
@@ -31,12 +57,34 @@
                 {
                     <div class="col">
                         <div class="card h-100 card-custom">
+                            @if (!string.IsNullOrEmpty(prod.ImagePath))
+                            {
+                                <div class="card-img-container" @onclick="() => OpenDetails(prod)" style="cursor: pointer;">
+                                    <img src="@prod.ImagePath" class="card-img-top p-3 rounded-5" style="height: 200px; object-fit: cover;" alt="@prod.Name" />
+                                    <div class="card-img-overlay-custom">
+                                        <span class="text-white fw-bold">View Details</span>
+                                    </div>
+                                </div>
+                            }
                             <div class="card-custom-body d-flex flex-column h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h5 class="card-title text-white mb-0">@prod.Name</h5>
+                                <div class="d-flex justify-content-between align-items-start mb-2" @onclick="() => OpenDetails(prod)" style="cursor: pointer;">
+                                    <h5 class="card-title text-white mb-0 card-title-hover">@prod.Name</h5>
                                     <span class="badge badge-custom px-2 py-1">@prod.Category?.Name</span>
                                 </div>
                                 <p class="card-text text-muted flex-grow-1">@prod.Description</p>
+                                
+                                <!-- Stock Level Progress Bar -->
+                                <div class="mt-2 mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="stock-status-text small">
+                                            @(prod.StockQuantity <= 3 ? "🔥 Low Stock: " : "Stock: ") @prod.StockQuantity left
+                                        </span>
+                                    </div>
+                                    <div class="progress-bar-custom">
+                                        <div class="progress-bar-fill @(prod.StockQuantity <= 3 ? "bg-danger" : "")" style="width: @(Math.Min(100, prod.StockQuantity * 10))%;"></div>
+                                    </div>
+                                </div>
+
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <span class="fs-4 fw-bold text-white">$@prod.Price.ToString("F2")</span>
                                     <button class="btn btn-primary-custom px-3 py-2 d-flex align-items-center"
@@ -55,13 +103,57 @@
             }
         </div>
 
-        <!-- Custom Pagination Component (reusable bUnit testable component) -->
+        <!-- Custom Pagination Component -->
         @if (TotalPages > 1)
         {
             <Pager CurrentPage="@CurrentPage" TotalPages="@TotalPages" PageUrl="@GetPageUrl" />
         }
     </div>
 </div>
+
+<!-- Product Details Modal Overlay -->
+@if (selectedDetailProduct != null)
+{
+    <div class="modal-backdrop-custom" @onclick="CloseDetails">
+        <div class="modal-custom p-4" @onclick:stopPropagation>
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h3 class="text-white mb-0">@selectedDetailProduct.Name</h3>
+                <button class="btn-close-custom" @onclick="CloseDetails">×</button>
+            </div>
+            
+            <div class="row align-items-center">
+                <div class="col-md-6 text-center">
+                    @if (!string.IsNullOrEmpty(selectedDetailProduct.ImagePath))
+                    {
+                        <img src="@selectedDetailProduct.ImagePath" class="img-fluid rounded-4 mb-3" style="max-height: 250px; object-fit: contain;" alt="@selectedDetailProduct.Name" />
+                    }
+                </div>
+                <div class="col-md-6 d-flex flex-column justify-content-between">
+                    <div>
+                        <span class="badge badge-custom px-2 py-1 mb-3">@selectedDetailProduct.Category?.Name</span>
+                        <p class="text-muted mb-4 fs-6">@selectedDetailProduct.Description</p>
+                        
+                        <div class="my-3">
+                            <span class="stock-status-text d-block small mb-1">
+                                @(selectedDetailProduct.StockQuantity <= 3 ? "🔥 Low Stock: " : "Stock Status: ") @selectedDetailProduct.StockQuantity left
+                            </span>
+                            <div class="progress-bar-custom">
+                                <div class="progress-bar-fill @(selectedDetailProduct.StockQuantity <= 3 ? "bg-danger" : "")" style="width: @(Math.Min(100, selectedDetailProduct.StockQuantity * 10))%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <span class="fs-3 fw-bold text-white">$@selectedDetailProduct.Price.ToString("F2")</span>
+                        <button class="btn btn-primary-custom px-4 py-2" @onclick="async () => { await AddToCart(selectedDetailProduct); CloseDetails(); }">
+                            Add To Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     [Parameter]
@@ -70,19 +162,27 @@
     [Parameter]
     public string? Category { get; set; }
 
+    private string searchQuery = "";
+    private Product? selectedDetailProduct;
+
     private int CurrentPage => Page ?? 1;
     private int PageSize = 4; // Display 4 products per page
 
     private IEnumerable<Product> Products => Repository.Products
-        .Where(p => Category == null || (p.Category != null && p.Category.Name == Category))
+        .Where(p => Category == null || (p.Category != null && string.Equals(p.Category.Name, Category, StringComparison.OrdinalIgnoreCase)))
+        .Where(p => string.IsNullOrEmpty(searchQuery) || p.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) || p.Description.Contains(searchQuery, StringComparison.OrdinalIgnoreCase))
         .Skip((CurrentPage - 1) * PageSize)
         .Take(PageSize)
         .ToList();
 
     private int TotalItems => Repository.Products
-        .Count(p => Category == null || (p.Category != null && p.Category.Name == Category));
+        .Count(p => (Category == null || (p.Category != null && string.Equals(p.Category.Name, Category, StringComparison.OrdinalIgnoreCase)))
+                 && (string.IsNullOrEmpty(searchQuery) || p.Name.Contains(searchQuery, StringComparison.OrdinalIgnoreCase) || p.Description.Contains(searchQuery, StringComparison.OrdinalIgnoreCase)));
 
     private int TotalPages => (int)Math.Ceiling((decimal)TotalItems / PageSize);
+
+    private void OpenDetails(Product p) => selectedDetailProduct = p;
+    private void CloseDetails() => selectedDetailProduct = null;
 
     private string GetPageUrl(int pageNum)
     {

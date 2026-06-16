@@ -20,7 +20,18 @@ namespace SportsStore.Services
             _sessionStorage = sessionStorage;
         }
 
-        public async Task LoadCartAsync()
+        private Task? _loadTask;
+
+        public Task LoadCartAsync()
+        {
+            if (_loadTask == null)
+            {
+                _loadTask = DoLoadCartAsync();
+            }
+            return _loadTask;
+        }
+
+        private async Task DoLoadCartAsync()
         {
             try
             {
@@ -42,6 +53,7 @@ namespace SportsStore.Services
             catch (Exception)
             {
                 // JS interop is disabled during pre-rendering, safe to ignore
+                _loadTask = null; // Clear if it failed due to pre-rendering
             }
         }
 

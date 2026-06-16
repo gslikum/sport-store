@@ -1,15 +1,14 @@
-/* SportsStore Custom Design System & Aesthetics */
 :root {
-    --bg-dark: #0f172a;       /* Slate 900 */
-    --bg-card: #1e293b;       /* Slate 800 */
-    --primary: #6366f1;       /* Indigo 500 */
-    --primary-hover: #4f46e5; /* Indigo 600 */
-    --accent: #14b8a6;        /* Teal 500 */
-    --accent-hover: #0d9488;  /* Teal 600 */
-    --text-main: #f8fafc;     /* Slate 50 */
-    --text-muted: #94a3b8;    /* Slate 400 */
-    --border-color: #334155;  /* Slate 700 */
-    --glow: rgba(99, 102, 241, 0.15);
+    --bg-dark: #090c14;       /* Deep high-performance carbon black */
+    --bg-card: #111625;       /* Athletic charcoal */
+    --primary: #adff2f;       /* Volt green */
+    --primary-hover: #9ad620; /* Darker volt */
+    --accent: #00f0ff;        /* Neon cyan accent */
+    --accent-hover: #00c8d6;  
+    --text-main: #f8fafc;     
+    --text-muted: #94a3b8;    /* Lighter slate for description readability */
+    --border-color: #1e293b;  
+    --glow: rgba(173, 255, 47, 0.15);
 }
 
 html, body {
@@ -70,46 +69,63 @@ a:hover, .btn-link:hover {
 }
 
 .nav-pill-custom:hover, .nav-pill-custom.active {
-    background-color: var(--primary);
-    color: var(--text-main);
+    background-color: rgba(173, 255, 47, 0.08);
+    color: var(--primary);
     border-color: var(--primary);
+    border-left: 4px solid var(--primary);
     box-shadow: 0 4px 12px var(--glow);
     transform: translateX(4px);
 }
 
 /* Premium Buttons */
 .btn-primary-custom {
-    background-color: var(--primary);
+    background-color: transparent;
     border: 1px solid var(--primary);
-    color: var(--text-main);
+    color: var(--primary);
     border-radius: 0.75rem;
     padding: 0.6rem 1.25rem;
-    font-weight: 500;
+    font-weight: 600;
     transition: all 0.2s ease;
 }
 
 .btn-primary-custom:hover {
-    background-color: var(--primary-hover);
-    border-color: var(--primary-hover);
+    background-color: var(--primary);
+    color: var(--bg-dark);
+    border-color: var(--primary);
     box-shadow: 0 4px 14px var(--glow);
     transform: translateY(-1px);
 }
 
 .btn-accent-custom {
-    background-color: var(--accent);
-    border: 1px solid var(--accent);
-    color: var(--text-main);
+    background-color: rgba(0, 240, 255, 0.05) !important;
+    border: 1px solid var(--accent) !important;
+    color: var(--accent) !important;
     border-radius: 0.75rem;
     padding: 0.6rem 1.25rem;
-    font-weight: 500;
+    font-weight: 600;
     transition: all 0.2s ease;
 }
 
-.btn-accent-custom:hover {
-    background-color: var(--accent-hover);
-    border-color: var(--accent-hover);
-    box-shadow: 0 4px 14px rgba(20, 184, 166, 0.25);
+.btn-accent-custom:hover, .btn-accent-custom:focus, .btn-accent-custom:active {
+    background-color: var(--accent) !important;
+    color: var(--bg-dark) !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 4px 14px rgba(0, 240, 255, 0.4);
     transform: translateY(-1px);
+}
+
+.btn-accent-custom:hover svg, .btn-accent-custom:focus svg, .btn-accent-custom:active svg {
+    color: var(--bg-dark) !important;
+    fill: var(--bg-dark) !important;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.stock-status-text {
+    color: #cbd5e1 !important;
+    font-weight: 500;
 }
 
 /* Custom Header with Glassmorphism */
@@ -125,8 +141,9 @@ a:hover, .btn-link:hover {
 
 /* Badge Styling */
 .badge-custom {
-    background-color: var(--primary);
-    color: var(--text-main);
+    background-color: rgba(173, 255, 47, 0.12);
+    color: var(--primary);
+    border: 1px solid rgba(173, 255, 47, 0.3);
     border-radius: 0.5rem;
     font-weight: 600;
 }
@@ -166,4 +183,203 @@ a:hover, .btn-link:hover {
 }
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary);
+}
+
+/* Blazor Error UI bar styling (hidden by default) */
+#blazor-error-ui {
+    background: #ef4444; /* Red 500 */
+    color: var(--text-main);
+    bottom: 0;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.4);
+    display: none;
+    left: 0;
+    padding: 0.8rem 1.5rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+    border-top: 1px solid #dc2626;
+}
+
+#blazor-error-ui a {
+    color: #fef08a; /* Yellow 200 for readability */
+    text-decoration: underline;
+    margin: 0 0.5rem;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 1.5rem;
+    top: 0.8rem;
+    color: var(--text-main);
+    font-size: 1.1rem;
+    opacity: 0.8;
+}
+
+#blazor-error-ui .dismiss:hover {
+    opacity: 1;
+}
+
+/* Sports Hero Banner Design */
+.hero-banner-custom {
+    background-image: linear-gradient(135deg, rgba(17, 22, 37, 0.95), rgba(9, 12, 20, 0.85)), url('/images/stadium.png');
+    background-size: cover;
+    background-position: center;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    min-height: 320px;
+}
+
+.hero-overlay-custom {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 80% 20%, rgba(173, 255, 47, 0.08), transparent 60%);
+    z-index: 1;
+}
+
+/* Custom Clickable Card Image Hover Overlay */
+.card-img-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-img-overlay-custom {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(9, 12, 20, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 1rem 1rem 0 0;
+}
+
+.card-img-container:hover .card-img-overlay-custom {
+    opacity: 1;
+}
+
+.card-title-hover {
+    transition: color 0.2s ease;
+}
+
+.card-title-hover:hover {
+    color: var(--primary) !important;
+}
+
+/* Stock Level Progress Bars */
+.progress-bar-custom {
+    background-color: var(--bg-dark);
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.progress-bar-fill {
+    background-color: var(--primary);
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+}
+
+/* Sliding Cart Side-Drawer CSS */
+.drawer-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1050;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.drawer-custom {
+    width: 100%;
+    max-width: 450px;
+    background-color: var(--bg-card);
+    border-left: 1px solid var(--border-color);
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.drawer-item {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    transition: border-color 0.2s ease;
+}
+
+.drawer-item:hover {
+    border-color: var(--primary);
+}
+
+/* Details Modal Overlay CSS */
+.modal-backdrop-custom {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(6px);
+    z-index: 1100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.modal-custom {
+    width: 100%;
+    max-width: 650px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px var(--glow);
+    animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.btn-close-custom {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 2rem;
+    line-height: 1;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.btn-close-custom:hover {
+    color: #ef4444;
+}
+
+/* CSS Keyframe Animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
 }

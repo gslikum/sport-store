@@ -18,6 +18,41 @@
 </head>
 
 <body>
+    <script>
+        window.onerror = function (message, url, line, col, error) {
+            var errorDiv = document.createElement("div");
+            errorDiv.style.position = "fixed";
+            errorDiv.style.bottom = "0";
+            errorDiv.style.left = "0";
+            errorDiv.style.width = "100%";
+            errorDiv.style.background = "red";
+            errorDiv.style.color = "white";
+            errorDiv.style.padding = "20px";
+            errorDiv.style.zIndex = "999999";
+            errorDiv.style.fontSize = "14px";
+            errorDiv.style.fontFamily = "monospace";
+            errorDiv.style.whiteSpace = "pre-wrap";
+            errorDiv.innerText = "JS Error: " + message + "\nURL: " + url + "\nLine: " + line + ":" + col + "\nStack: " + (error ? error.stack : "N/A");
+            document.body.appendChild(errorDiv);
+            return false;
+        };
+        window.addEventListener('unhandledrejection', function (event) {
+            var errorDiv = document.createElement("div");
+            errorDiv.style.position = "fixed";
+            errorDiv.style.bottom = "0";
+            errorDiv.style.left = "0";
+            errorDiv.style.width = "100%";
+            errorDiv.style.background = "darkred";
+            errorDiv.style.color = "white";
+            errorDiv.style.padding = "20px";
+            errorDiv.style.zIndex = "999999";
+            errorDiv.style.fontSize = "14px";
+            errorDiv.style.fontFamily = "monospace";
+            errorDiv.style.whiteSpace = "pre-wrap";
+            errorDiv.innerText = "Unhandled Promise Rejection: " + event.reason + (event.reason && event.reason.stack ? "\nStack: " + event.reason.stack : "");
+            document.body.appendChild(errorDiv);
+        });
+    </script>
     <Routes />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>

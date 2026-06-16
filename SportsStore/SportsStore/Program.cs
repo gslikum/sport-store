@@ -12,6 +12,9 @@ using SportsStore.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Register file logger provider to write exceptions to error_log.txt
+builder.Logging.AddProvider(new SportsStore.Services.FileLoggerProvider());
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()

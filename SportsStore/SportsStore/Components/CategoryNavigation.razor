@@ -8,7 +8,7 @@
     @foreach (var cat in Categories)
     {
         <a href="/products/category/@cat.Name" 
-           class="btn nav-pill-custom @(SelectedCategory == cat.Name ? "active" : "")">
+           class="btn nav-pill-custom @(string.Equals(SelectedCategory, cat.Name, StringComparison.OrdinalIgnoreCase) ? "active" : "")">
             @cat.Name
         </a>
     }

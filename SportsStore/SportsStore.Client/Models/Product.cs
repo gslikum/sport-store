@@ -29,5 +29,9 @@ namespace SportsStore.Client.Models
         [Required]
         [Range(0, int.MaxValue, ErrorMessage = "Stock quantity cannot be negative")]
         public int StockQuantity { get; set; }
+
+        [Required]
+        [StringLength(500)]
+        public string ImagePath { get; set; } = "/images/placeholder.png";
     }
 }

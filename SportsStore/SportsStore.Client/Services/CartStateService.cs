@@ -9,10 +9,12 @@ namespace SportsStore.Client.Services
         public Cart Cart { get; } = new();
 
         public event Action? OnChange;
+        public event Action? OnItemAdded;
 
         public void AddItem(Product product, int quantity)
         {
             Cart.AddItem(product, quantity);
+            OnItemAdded?.Invoke();
             NotifyStateChanged();
         }
 
